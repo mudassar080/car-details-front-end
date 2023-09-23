@@ -10,6 +10,8 @@ export default function CarForm() {
     const [maxPictures, setMaxPictures] = useState(3);
     const [selectedImages, setSelectedImages] = useState([]);
     const [imagePreviews, setImagePreviews] = useState([]);
+    const [success, setSuccess] = useState(false);
+
 
     const handlePictureUpload = (e) => {
         const selectedFiles = Array.from(e.target.files);
@@ -21,7 +23,6 @@ export default function CarForm() {
 
         setSelectedImages([...selectedImages, ...selectedFiles]);
 
-        // Create image previews for selected files
         const previews = selectedFiles.map((file) => URL.createObjectURL(file));
         setImagePreviews([...imagePreviews, ...previews]);
     };
@@ -41,33 +42,47 @@ export default function CarForm() {
         setMaxPictures(e.target.value);
     };
 
-    const handleAddCar = async () => {
-        const payload = {
-            carModel,
-            price,
-            phoneNumber,
-            maxPictures,
-            pictures: imagePreviews,
-        };
+    const resetForm = () => {
+        setCarModel('');
+        setPrice('');
+        setPhoneNumber('');
+        setMaxPictures(3);
+        setSelectedImages([]);
+        setImagePreviews([]);
+        setSuccess(false);
+    };
 
+
+    const handleAddCar = async () => {
+        if (!carModel || !price || !phoneNumber) {
+            alert('Please fill in all required fields.');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('carModel', carModel);
+        formData.append('price', price);
+        formData.append('phoneNumber', phoneNumber);
+        formData.append('maxPictures', maxPictures);
+        formData.append('gallery', selectedImages);
         try {
-            const response = await fetch('YOUR_API_ENDPOINT', {
+            const response = await fetch('http://192.168.100.145:8080/v1/car/add', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(payload),
+                body: formData,
             });
 
             if (response.ok) {
-                console.log('Car added successfully');
+                alert('Car added successfully');
+                setSuccess(true);
+                // resetForm();
             } else {
-                console.error('Failed to add car');
+                alert('Failed to add car');
             }
         } catch (error) {
             console.error('An error occurred:', error);
         }
     };
+
 
     useEffect(() => {
         return () => {

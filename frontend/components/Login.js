@@ -25,7 +25,7 @@ export default function Login() {
         if (!email.trim()) {
             newErrors.email = 'Email is required';
         }
-        
+
         if (!password.trim()) {
             newErrors.password = 'Password is required';
         }
@@ -40,7 +40,7 @@ export default function Login() {
         console.log(formData);
 
         try {
-            const response = await fetch('YOUR_CUSTOM_API_ENDPOINT', {
+            const response = await fetch('http://192.168.100.145:8080/v1/user/sign-in', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -48,17 +48,18 @@ export default function Login() {
                 body: JSON.stringify(formData),
             });
 
-            if (!response.ok) {
+            if (response.status === 200) {
+                alert('Login successful');
                 router.push('carmodel');
-                console.log('Login successful');
-
+            } else if (response.status === 401) {
+                alert('Login failed: Email or password is incorrect');
             } else {
-                console.error('Login failed');
+                alert('Login failed: An unexpected error occurred');
             }
         } catch (error) {
             console.error('An error occurred:', error);
         }
-    };
+    }
 
     return (
         <div className={styles.container}>
